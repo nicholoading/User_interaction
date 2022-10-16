@@ -28,9 +28,34 @@ app.get('/', (req, res) => {
 });
 
 app.post('/sign-up', (req, res) => {
-    const data = new newModel({ email: req.body.email, password: req.body.password});
-    data.save();
-    res.send(`Welcome ${req.body.email}`)
+    const email = req.body.email;
+    newModel.find({ email: email }, (err,user) => {
+        try {
+            if (email === user[0].email) {
+                return res.send("User already exist. Log in instead.")
+            }
+        } catch (err) {
+            const data = new newModel({ email: req.body.email, password: req.body.password});
+            data.save();
+            res.send(`Welcome ${req.body.email}`)
+        }
+    }
+)});
+
+app.post('/log-in', (req, res) => {
+    const email = req.body.email;
+    const pw = req.body.password;
+    newModel.find({ email: email }, (err,user) => {
+        try {
+            if (email === user[0].email && pw !== user[0].password) {
+                res.send('Found the email but password is wrong')
+            } else if (email === user[0].email && pw === user[0].password) {
+                res.send("Log in successfull")
+            }
+        } catch (err) {
+            res.send("User not found")
+        }
+    })
 })
 
 app.listen(PORT, () => {
